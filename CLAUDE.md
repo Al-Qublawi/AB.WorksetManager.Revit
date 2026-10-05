@@ -42,8 +42,9 @@ Part of the AB Adv Tools suite; the kit is vendored in `shared/ABAdvTools` (cano
   not focusable (so Space reaches the grid). Locked rows are never ticked.
 - Families search also matches the Workset column.
 - Banner line under the title: `AdvToolsBrand.Copyright` + LinkedIn link (`AdvToolsBrand.LinkedInUrl`).
-- `DevHarness.MultiTickTest` checks the selection/click/Space part in a briefly shown window; **not run yet**
-  (the bridge was off when 1.0.1 was built). Shift+click reads the real keyboard and is not simulated.
+- `DevHarness.MultiTickTest` (briefly shown real window, Delete tab) **passed in Revit 2026.5**: pressing a tick
+  box keeps a 3-row selection, its click ticks all 3, Space unticks / ticks them; banner text correct.
+  Shift+click reads the real keyboard and is not simulated.
 
 ## Layout
 

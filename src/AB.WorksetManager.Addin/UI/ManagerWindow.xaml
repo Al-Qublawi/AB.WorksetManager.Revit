@@ -536,9 +536,10 @@
                     <Button Content="Clear" Click="ResultsClear_Click" MinWidth="55" />
                     <Button Content="Close" Click="Close_Click" MinWidth="70" Margin="0" />
                 </StackPanel>
-                <TextBlock VerticalAlignment="Center">
+                <TextBlock VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Margin="0,0,8,0"
+                           ToolTip="Select rows with Shift+click or Ctrl+click, then tick one of their boxes (or press Space) to tick them all. Shift+click a box ticks the range from the last box you clicked.">
                     <Run Text="Results" FontWeight="SemiBold" />
-                    <Run Text="     Tip: select rows with Shift+click or Ctrl+click, then tick one of their boxes (or press Space) to tick them all. Shift+click a box ticks the range from the last box." Foreground="{StaticResource Muted}" />
+                    <Run Text="     Tip: Shift+click or Ctrl+click rows, then tick one box or press Space to tick them all." Foreground="{StaticResource Muted}" />
                 </TextBlock>
             </DockPanel>
             <TextBox x:Name="ResultsBox" IsReadOnly="True" FontFamily="Consolas" FontSize="11.5" VerticalContentAlignment="Top"
