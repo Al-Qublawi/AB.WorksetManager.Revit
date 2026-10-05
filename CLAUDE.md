@@ -34,6 +34,17 @@ Part of the AB Adv Tools suite; the kit is vendored in `shared/ABAdvTools` (cano
   9. Not workshared -> **just a message**.
 - Revit 2022-2027, private repo, English only, code-free MSI (Only me default, Everyone for IT).
 
+## 1.0.1 (owner's requests after his first test, 2026-10-05)
+
+- Multi-row ticking in every tick list (`UI/ManagerWindow.Selection.cs`): Shift+click a box ticks the range
+  from the last box clicked (in the shown, filtered order); ticking a box of a row inside a multi-row
+  selection ticks all selected rows; Space toggles the selected rows. Tick boxes carry `Tag="Tick"` and are
+  not focusable (so Space reaches the grid). Locked rows are never ticked.
+- Families search also matches the Workset column.
+- Banner line under the title: `AdvToolsBrand.Copyright` + LinkedIn link (`AdvToolsBrand.LinkedInUrl`).
+- `DevHarness.MultiTickTest` checks the selection/click/Space part in a briefly shown window; **not run yet**
+  (the bridge was off when 1.0.1 was built). Shift+click reads the real keyboard and is not simulated.
+
 ## Layout
 
 - `src/AB.WorksetManager.Core` (netstandard2.0, no Revit): `WorksetNames` (valid names), `NameList`

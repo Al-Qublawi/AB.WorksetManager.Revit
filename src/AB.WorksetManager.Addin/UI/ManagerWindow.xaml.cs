@@ -34,6 +34,8 @@ namespace AB.WorksetManager.Addin.UI
             Title = App.ProductName + " " + App.Version;
             ModelText.Text = session.Doc.Title + (DocumentGuard.UsesCentral(session.Doc) ? "  (local copy)" : session.Doc.IsDetached ? "  (detached)" : "  (central)");
             UserText.Text = "Signed in as " + Worksets.CurrentUser(session.Doc);
+            CopyrightRun.Text = ABAdvTools.AdvToolsBrand.Copyright;
+            LinkedInRun.Text = "LinkedIn: " + ABAdvTools.AdvToolsBrand.LinkedInUrl.Replace("https://www.", "").TrimEnd('/');
 
             Width = Math.Max(MinWidth, UserSettings.GetInt(UserSettings.WindowWidth, (int)Width));
             Height = Math.Max(MinHeight, UserSettings.GetInt(UserSettings.WindowHeight, (int)Height));
@@ -47,6 +49,7 @@ namespace AB.WorksetManager.Addin.UI
             Row.TickChanged += OnTickChanged;
 
             InitViewFilters();
+            HookMultiTick();
             // Grids with no rows yet still lay out their columns.
             foreach (DataGrid grid in new[] { CrGrid, RnGrid, GlGrid, LkGrid, V3Grid, ElGrid, ViViews, ViWorksets, DlGrid, OvGrid })
                 grid.ItemsSource = new List<object>();
@@ -96,6 +99,12 @@ namespace AB.WorksetManager.Addin.UI
         }
 
         private void Close_Click(object sender, RoutedEventArgs e) => Close();
+
+        private void LinkedIn_Click(object sender, RoutedEventArgs e)
+        {
+            if (!ABAdvTools.AdvToolsBrand.OpenUrl(ABAdvTools.AdvToolsBrand.LinkedInUrl))
+                Tell(ABAdvTools.AdvToolsBrand.LinkedInUrl);
+        }
 
         // ------------------------------------------------------------------ tabs
 

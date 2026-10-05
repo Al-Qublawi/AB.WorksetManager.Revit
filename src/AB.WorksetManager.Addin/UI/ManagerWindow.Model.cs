@@ -188,7 +188,7 @@ namespace AB.WorksetManager.Addin.UI
                 var r = (ElementRow)o;
                 if (cat != null && cat != AllCategories && r.Category != cat) return false;
                 if (src != null && src != AllWorksets && r.Workset != src) return false;
-                return text.Length == 0 || Contains(r.Family, text) || Contains(r.Type, text) || Contains(r.Category, text);
+                return text.Length == 0 || Contains(r.Family, text) || Contains(r.Type, text) || Contains(r.Category, text) || Contains(r.Workset, text);
             };
         }
 

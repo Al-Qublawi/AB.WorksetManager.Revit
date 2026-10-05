@@ -246,6 +246,74 @@ namespace AB.WorksetManager.Addin.Diagnostics
         }
 
         /// <summary>
+        /// Multi-row ticking in a real (briefly shown) window on the Delete tab: rows selected, a mouse press
+        /// on one row's tick box must not collapse the selection, a click on it must tick every selected row,
+        /// and Space must toggle the selection. Shift+click reads the real keyboard and is not simulated.
+        /// </summary>
+        public static string MultiTickTest(UIApplication uiapp, Document doc)
+        {
+            var log = new StringBuilder();
+            var window = new ManagerWindow(new ManagerSession(uiapp, new UIDocument(doc)));
+            window.Tabs.SelectedIndex = 8;
+            window.ContentRendered += (s, e) => window.Dispatcher.BeginInvoke(DispatcherPriority.ApplicationIdle, new Action(() =>
+            {
+                try
+                {
+                    System.Windows.Controls.DataGrid grid = window.DlGrid;
+                    var rows = grid.Items.OfType<Row>().ToList();
+                    log.AppendLine("rows " + rows.Count);
+                    foreach (Row r in rows) r.IsChecked = false;
+                    grid.SelectedItems.Clear();
+                    for (int i = 1; i <= 3; i++) grid.SelectedItems.Add(rows[i]);
+                    grid.UpdateLayout();
+
+                    var container = (System.Windows.Controls.DataGridRow)grid.ItemContainerGenerator.ContainerFromIndex(2);
+                    System.Windows.Controls.CheckBox box = FindTick(container);
+                    log.AppendLine("tick box found " + (box != null));
+
+                    var down = new System.Windows.Input.MouseButtonEventArgs(System.Windows.Input.Mouse.PrimaryDevice, Environment.TickCount, System.Windows.Input.MouseButton.Left)
+                    { RoutedEvent = UIElement.PreviewMouseLeftButtonDownEvent, Source = box };
+                    box.RaiseEvent(down);
+                    down = new System.Windows.Input.MouseButtonEventArgs(System.Windows.Input.Mouse.PrimaryDevice, Environment.TickCount, System.Windows.Input.MouseButton.Left)
+                    { RoutedEvent = UIElement.MouseLeftButtonDownEvent, Source = box };
+                    box.RaiseEvent(down);
+                    log.AppendLine("selection after pressing a tick box: " + grid.SelectedItems.Count + " (want 3)");
+
+                    rows[2].IsChecked = true;   // what the box's own toggle does
+                    box.RaiseEvent(new RoutedEventArgs(System.Windows.Controls.Primitives.ButtonBase.ClickEvent, box));
+                    log.AppendLine("ticked after click: rows " + string.Join(",", rows.Select((r, i) => r.IsChecked ? i.ToString() : null).Where(x => x != null)) + " (want 1,2,3)");
+
+                    grid.Focus();
+                    var key = new System.Windows.Input.KeyEventArgs(System.Windows.Input.Keyboard.PrimaryDevice, PresentationSource.FromVisual(grid), Environment.TickCount, System.Windows.Input.Key.Space)
+                    { RoutedEvent = System.Windows.Input.Keyboard.PreviewKeyDownEvent };
+                    grid.RaiseEvent(key);
+                    log.AppendLine("after Space: ticked " + rows.Count(r => r.IsChecked) + " (want 0 - all three were ticked)");
+                    grid.RaiseEvent(new System.Windows.Input.KeyEventArgs(System.Windows.Input.Keyboard.PrimaryDevice, PresentationSource.FromVisual(grid), Environment.TickCount, System.Windows.Input.Key.Space)
+                    { RoutedEvent = System.Windows.Input.Keyboard.PreviewKeyDownEvent });
+                    log.AppendLine("after Space again: ticked " + rows.Count(r => r.IsChecked) + " (want 3)");
+                    log.AppendLine("banner: " + window.CopyrightRun.Text + " | " + window.LinkedInRun.Text);
+                }
+                catch (Exception ex) { log.AppendLine("EXCEPTION " + ex.Message + Environment.NewLine + ex.StackTrace); }
+                finally { window.Close(); }
+            }));
+            window.ShowDialog();
+            return log.ToString();
+        }
+
+        private static System.Windows.Controls.CheckBox FindTick(DependencyObject parent)
+        {
+            if (parent == null) return null;
+            for (int i = 0; i < System.Windows.Media.VisualTreeHelper.GetChildrenCount(parent); i++)
+            {
+                DependencyObject child = System.Windows.Media.VisualTreeHelper.GetChild(parent, i);
+                if (child is System.Windows.Controls.CheckBox cb && "Tick".Equals(cb.Tag)) return cb;
+                var found = FindTick(child);
+                if (found != null) return found;
+            }
+            return null;
+        }
+
+        /// <summary>
         /// Proves the pick loop: a modal window hidden from inside ShowDialog returns from it, and the same
         /// window can be shown modally again. Shows a small window for about a second.
         /// </summary>

@@ -122,8 +122,8 @@
         </Style>
         <!-- One click ticks the box (no "select the row first"). -->
         <DataTemplate x:Key="TickCell">
-            <CheckBox IsChecked="{Binding IsChecked, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding CanTick}"
-                      HorizontalAlignment="Center" Margin="0" />
+            <CheckBox Tag="Tick" IsChecked="{Binding IsChecked, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding CanTick}"
+                      HorizontalAlignment="Center" Margin="0" Focusable="False" />
         </DataTemplate>
         <Style TargetType="TabItem">
             <Setter Property="Padding" Value="12,5" />
@@ -149,6 +149,14 @@
                     <TextBlock Text="AB Worksets Manager" Foreground="White" FontSize="17" FontWeight="SemiBold" />
                     <TextBlock Text="Every change is checked first, skips what others have borrowed, and is one Undo (Ctrl+Z)."
                                Foreground="{StaticResource NavySubtle}" />
+                    <TextBlock Margin="0,3,0,0" Foreground="{StaticResource NavySubtle}">
+                        <Run x:Name="CopyrightRun" />
+                        <Run Text="  |  " />
+                        <Hyperlink x:Name="LinkedInLink" Click="LinkedIn_Click" Foreground="#7FB2FF" TextDecorations="{x:Null}"
+                                   ToolTip="Open Abdullah Lotfy's LinkedIn profile">
+                            <Run x:Name="LinkedInRun" />
+                        </Hyperlink>
+                    </TextBlock>
                 </StackPanel>
             </DockPanel>
         </Border>
@@ -392,7 +400,7 @@
                         <TextBlock Text="On workset" Style="{StaticResource Label}" />
                         <ComboBox x:Name="ElSource" Width="190" SelectionChanged="ElFilter_Changed" Margin="0,0,10,0" />
                         <TextBlock Text="Search" Style="{StaticResource Label}" />
-                        <TextBox x:Name="ElSearch" Width="160" TextChanged="ElSearch_TextChanged" />
+                        <TextBox x:Name="ElSearch" Width="160" TextChanged="ElSearch_TextChanged" ToolTip="Searches category, family, type and workset" />
                     </StackPanel>
                     <StackPanel DockPanel.Dock="Top" Style="{StaticResource Bar}">
                         <Button Content="Tick all shown" Click="ElTickShown_Click" />
@@ -528,7 +536,10 @@
                     <Button Content="Clear" Click="ResultsClear_Click" MinWidth="55" />
                     <Button Content="Close" Click="Close_Click" MinWidth="70" Margin="0" />
                 </StackPanel>
-                <TextBlock Text="Results" FontWeight="SemiBold" VerticalAlignment="Center" />
+                <TextBlock VerticalAlignment="Center">
+                    <Run Text="Results" FontWeight="SemiBold" />
+                    <Run Text="     Tip: select rows with Shift+click or Ctrl+click, then tick one of their boxes (or press Space) to tick them all. Shift+click a box ticks the range from the last box." Foreground="{StaticResource Muted}" />
+                </TextBlock>
             </DockPanel>
             <TextBox x:Name="ResultsBox" IsReadOnly="True" FontFamily="Consolas" FontSize="11.5" VerticalContentAlignment="Top"
                      VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Background="White" TextWrapping="NoWrap" />
