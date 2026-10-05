@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Everything AB Worksets Manager decides without Revit: which names are valid, what a pasted list or
+    CSV file says, what a rename list will do, how a naming template expands, and CSV output.
+    Loaded by .NET Framework 4.8, .NET 8 and .NET 10, and tested without Revit.
+  -->
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>AB.WorksetManager.Core</RootNamespace>
+    <AssemblyName>AB.WorksetManager.Core</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="AB.WorksetManager.Core.Tests" />
+  </ItemGroup>
+
+</Project>

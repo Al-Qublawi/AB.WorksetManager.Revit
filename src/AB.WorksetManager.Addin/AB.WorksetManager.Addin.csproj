@@ -1,0 +1,143 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    ============================================================================
+     AB Worksets Manager - Revit add-in, multi-targeted across the .NET transitions
+    ============================================================================
+       Revit 2022 - 2024   .NET Framework 4.8    -> net48
+       Revit 2025 - 2026   .NET 8 (Windows)      -> net8.0-windows
+       Revit 2027          .NET 10 (Windows)     -> net10.0-windows
+
+     Build one release:
+       dotnet build -c Release -f net48           -p:RevitVersion=2022
+       dotnet build -c Release -f net8.0-windows  -p:RevitVersion=2026
+       dotnet build -c Release -f net10.0-windows -p:RevitVersion=2027
+
+     build\build-all.ps1 loops the whole matrix.
+  -->
+
+  <PropertyGroup>
+    <TargetFrameworks>net48;net8.0-windows;net10.0-windows</TargetFrameworks>
+    <RootNamespace>AB.WorksetManager.Addin</RootNamespace>
+    <AssemblyName>AB.WorksetManager.Addin</AssemblyName>
+    <PlatformTarget>x64</PlatformTarget>
+    <UseWPF>true</UseWPF>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+    <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
+    <EnableDefaultNoneItems>false</EnableDefaultNoneItems>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+  </PropertyGroup>
+
+  <!-- Default Revit release per runtime. Override on the command line. -->
+  <PropertyGroup>
+    <RevitVersion Condition="'$(RevitVersion)' == '' and '$(TargetFramework)' == 'net48'">2022</RevitVersion>
+    <RevitVersion Condition="'$(RevitVersion)' == '' and '$(TargetFramework)' == 'net8.0-windows'">2026</RevitVersion>
+    <RevitVersion Condition="'$(RevitVersion)' == '' and '$(TargetFramework)' == 'net10.0-windows'">2027</RevitVersion>
+    <RevitVersion Condition="'$(RevitVersion)' == ''">2022</RevitVersion>
+    <RevitApiDir Condition="'$(RevitApiDir)' == ''">$(RevitProgramRoot)\Revit $(RevitVersion)</RevitApiDir>
+    <OutputPath>$(MSBuildThisFileDirectory)..\..\artifacts\$(Configuration)\Revit$(RevitVersion)\</OutputPath>
+
+    <!--
+      Revit API metadata comes from pinned reference-assembly packages, not the Revit installed
+      here: an Autodesk update on the build PC must never make the add-in unbuildable (Revit 2026
+      update 26.5 moved to .NET 10 and broke net8 builds that referenced the installed DLLs).
+      Pass -p:UseRevitApiPackages=false to compile against a local install instead.
+    -->
+    <UseRevitApiPackages Condition="'$(UseRevitApiPackages)' == ''">true</UseRevitApiPackages>
+
+    <RevitTargetFramework Condition="'$(RevitVersion)' &lt; '2025'">net48</RevitTargetFramework>
+    <RevitTargetFramework Condition="'$(RevitVersion)' &gt;= '2025' and '$(RevitVersion)' &lt; '2027'">net8.0-windows</RevitTargetFramework>
+    <RevitTargetFramework Condition="'$(RevitVersion)' &gt;= '2027'">net10.0-windows</RevitTargetFramework>
+
+    <RevitApiPackageVersion Condition="'$(RevitVersion)' == '2022'">2022.1.80</RevitApiPackageVersion>
+    <RevitApiPackageVersion Condition="'$(RevitVersion)' == '2023'">2023.1.90</RevitApiPackageVersion>
+    <RevitApiPackageVersion Condition="'$(RevitVersion)' == '2024'">2024.3.60</RevitApiPackageVersion>
+    <RevitApiPackageVersion Condition="'$(RevitVersion)' == '2025'">2025.4.60</RevitApiPackageVersion>
+    <RevitApiPackageVersion Condition="'$(RevitVersion)' == '2026'">2026.4.10</RevitApiPackageVersion>
+    <RevitApiPackageVersion Condition="'$(RevitVersion)' == '2027'">2027.2.0</RevitApiPackageVersion>
+
+    <!-- Frameworks and releases would otherwise share obj\$(Configuration) and clobber AssemblyInfo. -->
+    <IntermediateOutputPath>obj\$(Configuration)\$(TargetFramework)\Revit$(RevitVersion)\</IntermediateOutputPath>
+  </PropertyGroup>
+
+  <!--
+    Version gates for the Revit API changes this add-in has to handle:
+      2023+  Category.BuiltInCategory property
+      2024+  ElementId.Value (long) replaces IntegerValue; ForgeTypeId parameter groups
+      2025+  .NET 8 runtime
+      2026+  ElementId(int) and IntegerValue removed
+      2027+  .NET 10 runtime
+  -->
+  <PropertyGroup>
+    <DefineConstants>$(DefineConstants);REVIT$(RevitVersion)</DefineConstants>
+    <DefineConstants Condition="'$(RevitVersion)' &gt;= '2023'">$(DefineConstants);REVIT2023_OR_GREATER</DefineConstants>
+    <DefineConstants Condition="'$(RevitVersion)' &gt;= '2024'">$(DefineConstants);REVIT2024_OR_GREATER</DefineConstants>
+    <DefineConstants Condition="'$(RevitVersion)' &gt;= '2025'">$(DefineConstants);REVIT2025_OR_GREATER</DefineConstants>
+    <DefineConstants Condition="'$(RevitVersion)' &gt;= '2026'">$(DefineConstants);REVIT2026_OR_GREATER</DefineConstants>
+    <DefineConstants Condition="'$(RevitVersion)' &gt;= '2027'">$(DefineConstants);REVIT2027_OR_GREATER</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AB.WorksetManager.Core\AB.WorksetManager.Core.csproj" />
+  </ItemGroup>
+
+  <!-- Reference-only packages: nothing lands in the output, Revit loads its own copies. -->
+  <ItemGroup Condition="'$(UseRevitApiPackages)' == 'true' and '$(TargetFramework)' == '$(RevitTargetFramework)'">
+    <PackageReference Include="Nice3point.Revit.Api.RevitAPI" Version="$(RevitApiPackageVersion)"
+                      PrivateAssets="all" ExcludeAssets="runtime" />
+    <PackageReference Include="Nice3point.Revit.Api.RevitAPIUI" Version="$(RevitApiPackageVersion)"
+                      PrivateAssets="all" ExcludeAssets="runtime" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(UseRevitApiPackages)' != 'true'">
+    <Reference Include="RevitAPI">
+      <HintPath>$(RevitApiDir)\RevitAPI.dll</HintPath>
+      <Private>false</Private>
+      <SpecificVersion>false</SpecificVersion>
+    </Reference>
+    <Reference Include="RevitAPIUI">
+      <HintPath>$(RevitApiDir)\RevitAPIUI.dll</HintPath>
+      <Private>false</Private>
+      <SpecificVersion>false</SpecificVersion>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net48'">
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Core" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="WindowsBase" />
+    <Reference Include="System.Xaml" />
+  </ItemGroup>
+
+  <!-- Ribbon icons ride inside the assembly. -->
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Icons\*.png">
+      <LogicalName>AB.WorksetManager.Addin.Resources.Icons.%(Filename)%(Extension)</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <!-- Diagnostics (the live-test harness) exists in Debug builds only. -->
+  <ItemGroup Condition="'$(Configuration)' != 'Debug'">
+    <Compile Remove="Diagnostics\**\*.cs" />
+  </ItemGroup>
+
+  <!-- AB Adv Tools suite: shared tab, About / Check for Updates / LinkedIn, release notices. -->
+  <Import Project="..\..\shared\ABAdvTools\build\ABAdvTools.Revit.targets" />
+
+  <Target Name="ValidateRevitApi" BeforeTargets="ResolveAssemblyReferences">
+    <Error Condition="'$(UseRevitApiPackages)' == 'true' and '$(RevitApiPackageVersion)' == ''"
+           Text="No Revit API package version is pinned for Revit $(RevitVersion). AB Worksets Manager supports Revit 2022 - 2027." />
+    <Error Condition="'$(UseRevitApiPackages)' != 'true' and !Exists('$(RevitApiDir)\RevitAPI.dll')"
+           Text="RevitAPI.dll was not found at '$(RevitApiDir)'." />
+    <Error Condition="'$(TargetFramework)' != '$(RevitTargetFramework)'"
+           Text="Revit $(RevitVersion) runs on $(RevitTargetFramework). Build it with -f $(RevitTargetFramework)." />
+  </Target>
+
+  <Target Name="ReportRevitTarget" AfterTargets="Build">
+    <Message Importance="high" Text="  -> AB.WorksetManager.Addin built for Revit $(RevitVersion) ($(TargetFramework)) into $(OutputPath)" />
+  </Target>
+
+</Project>

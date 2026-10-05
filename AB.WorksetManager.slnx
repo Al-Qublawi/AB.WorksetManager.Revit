@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/AB.WorksetManager.Core/AB.WorksetManager.Core.csproj" />
+    <Project Path="src/AB.WorksetManager.Addin/AB.WorksetManager.Addin.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/AB.WorksetManager.Core.Tests/AB.WorksetManager.Core.Tests.csproj" />
+  </Folder>
+</Solution>

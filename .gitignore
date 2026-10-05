@@ -1,0 +1,30 @@
+# ---- build output ------------------------------------------------------
+artifacts/
+dist/
+bin/
+obj/
+*.pdb
+
+# ---- installer ---------------------------------------------------------
+*.msi
+*.wixpdb
+*.allowlist.txt
+
+# ---- Revit backups and journals ---------------------------------------
+*.000[0-9].rvt
+*.000[0-9].rfa
+
+# ---- IDE / tooling -----------------------------------------------------
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+*.DotSettings.user
+
+# ---- scratch -----------------------------------------------------------
+.testout/
+*.log
+
+# ---- Claude Code: per-PC settings only (shared project context lives in CLAUDE.md) ----
+.claude/settings.local.json

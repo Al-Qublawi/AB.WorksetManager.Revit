@@ -1,0 +1,38 @@
+<Project>
+
+  <!--
+    Shared MSBuild settings for AB Worksets Manager.
+
+      AB.WorksetManager.Core        netstandard2.0   Revit-free logic: name checks, list parsing, naming templates, CSV.
+      AB.WorksetManager.Addin       net48            Revit 2022 - 2024
+                                    net8.0-windows   Revit 2025 - 2026
+                                    net10.0-windows  Revit 2027
+      AB.WorksetManager.Core.Tests  net8.0           dotnet run - no Revit needed.
+  -->
+
+  <PropertyGroup>
+    <LangVersion>9.0</LangVersion>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Deterministic>true</Deterministic>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <Company>Abdullah Lotfy</Company>
+    <Authors>Abdullah Lotfy</Authors>
+    <Product>AB Worksets Manager</Product>
+    <Version>1.0.0</Version>
+    <FileVersion>1.0.0.0</FileVersion>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <Copyright>Copyright (c) Abdullah Lotfy</Copyright>
+    <PackageProjectUrl>https://www.linkedin.com/in/abdullahalqublawi/</PackageProjectUrl>
+    <NoWarn>$(NoWarn);CS1591;NU1701;MSB3277;CA1416</NoWarn>
+    <ErrorReport>none</ErrorReport>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <DebugType>portable</DebugType>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <RevitProgramRoot Condition="'$(RevitProgramRoot)' == ''">C:\Program Files\Autodesk</RevitProgramRoot>
+  </PropertyGroup>
+
+</Project>

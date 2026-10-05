@@ -1,0 +1,17 @@
+# Normalise text line endings; keep binaries and Windows-only scripts intact.
+* text=auto eol=lf
+
+*.ps1   text eol=crlf
+*.bat   text eol=crlf
+*.cmd   text eol=crlf
+*.sln   text eol=crlf
+*.slnx  text eol=crlf
+
+*.png   binary
+*.ico   binary
+*.dll   binary
+*.exe   binary
+
+*.rfa   binary
+*.rft   binary
+*.rvt   binary
