@@ -168,7 +168,7 @@
                 <DockPanel Margin="10">
                     <StackPanel DockPanel.Dock="Top" Style="{StaticResource Bar}">
                         <Button Content="Refresh" Click="OvRefresh_Click" />
-                        <Button Content="Export to CSV..." Click="OvExport_Click" />
+                        <Button Content="Export to Excel..." Click="OvExport_Click" />
                         <Button Content="Make active" Click="OvMakeActive_Click" ToolTip="Make the selected workset the active workset (new elements go on it)." />
                         <TextBlock x:Name="OvSummary" Style="{StaticResource Label}" Margin="10,0,0,0" Foreground="{StaticResource Muted}" />
                     </StackPanel>
@@ -199,7 +199,7 @@
                         <TextBlock DockPanel.Dock="Top" Style="{StaticResource Hint}"
                                    Text="One per line, or paste from Excel. A second column of Yes/No sets 'Visible in all views'. Lines starting with # are ignored." />
                         <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Margin="0,8,0,0">
-                            <Button Content="Load .txt / .csv..." Click="CrLoad_Click" />
+                            <Button Content="Load Excel / CSV / text..." Click="CrLoad_Click" />
                             <Button Content="Check" Click="CrCheck_Click" Style="{StaticResource Primary}" />
                         </StackPanel>
                         <TextBox x:Name="CrText" AcceptsReturn="True" AcceptsTab="True" VerticalContentAlignment="Top"
@@ -237,7 +237,7 @@
             <TabItem Header="Rename">
                 <DockPanel Margin="10">
                     <TextBlock DockPanel.Dock="Top" Style="{StaticResource Hint}"
-                               Text="Type the new names, or load a list with two columns: current name and new name (Export gives you a ready list to edit in Excel). Rows without a new name are left as they are." />
+                               Text="Type the new names, or load a list with two columns: current name and new name (Export list gives you a ready Excel file - edit the New Name column and load it back). Rows without a new name are left as they are." />
                     <StackPanel DockPanel.Dock="Top" Style="{StaticResource Bar}">
                         <Button Content="Load list..." Click="RnLoad_Click" />
                         <Button Content="Export list..." Click="RnExport_Click" />

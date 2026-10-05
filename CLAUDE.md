@@ -46,11 +46,21 @@ Part of the AB Adv Tools suite; the kit is vendored in `shared/ABAdvTools` (cano
   box keeps a 3-row selection, its click ticks all 3, Space unticks / ticks them; banner text correct.
   Shift+click reads the real keyboard and is not simulated - **the owner tried it by hand in 1.0.1: works.**
 
+## 1.0.2 - Excel ate the names (owner's report, 2026-10-05)
+
+His real worksets start with `+ Link_...`; the 1.0.0 CSV export opened in Excel as `=+ Link_...` -> `#NAME?`
+(and saving it would have destroyed the names). Fix: `Core/Spreadsheet.cs` - `Xlsx` writes inline-string cells
+with a Text number format (numFmt 49) on every cell and column, and reads .xlsx (shared strings, inline strings,
+first sheet via workbook rels); `ListFile` picks the format by extension; CSV guards values Excel would misread
+(`ExcelText.NeedsGuard`: leading = + - @, numbers, dates) as `="..."`, and `NameList.FromCells` unwraps them.
+Checked through real Excel by COM on this PC: the .xlsx and the CSV both show `+ Link_DG-...`, `01`, `3-4`,
+`=Equals` exactly; `+ Link_NEW-A` typed into the New Name column stays text; Excel's saved file reads back exactly.
+
 ## Layout
 
 - `src/AB.WorksetManager.Core` (netstandard2.0, no Revit): `WorksetNames` (valid names), `NameList`
   (text / Excel paste / CSV), `CreatePlan`, `RenamePlan` (+ `Steps`: swaps and capitals-only renames go
-  through `ABWM-TEMP-n-xxxx` names), `NameTemplate`, `Csv`. Tested by `tests/AB.WorksetManager.Core.Tests`.
+  through `ABWM-TEMP-n-xxxx` names), `NameTemplate`, `Csv`, `Xlsx` / `ListFile` / `ExcelText` (Spreadsheet.cs). Tested by `tests/AB.WorksetManager.Core.Tests`.
 - `src/AB.WorksetManager.Addin` (net48 / net8.0-windows / net10.0-windows):
   - `Infrastructure/Report.cs` - `ModelChange.Run` (one transaction, rollback on any error; report lines
     written inside are dropped if Revit rolls back), `DocumentGuard`, `Report`.

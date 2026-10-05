@@ -189,9 +189,9 @@ namespace AB.WorksetManager.Addin.UI
 
         internal void ExportStatus(DataTable table)
         {
-            var rows = new List<IEnumerable<string>> { table.Columns.Cast<DataColumn>().Select(c => c.Caption).ToList() };
-            rows.AddRange(table.Rows.Cast<DataRow>().Select(r => r.ItemArray.Select(v => Convert.ToString(v)).ToList()));
-            ExportCsv("Export visibility status", _session.Doc.Title + " - workset visibility.csv", rows);
+            var rows = new List<IList<string>> { table.Columns.Cast<DataColumn>().Select(c => c.Caption).ToList() };
+            rows.AddRange(table.Rows.Cast<DataRow>().Select(r => (IList<string>)r.ItemArray.Select(v => Convert.ToString(v)).ToList()));
+            Export("Export visibility status", _session.Doc.Title + " - workset visibility", rows);
         }
     }
 }

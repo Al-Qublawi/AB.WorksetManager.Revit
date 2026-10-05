@@ -74,7 +74,7 @@ namespace AB.WorksetManager.Core
         }
     }
 
-    /// <summary>CSV text Excel opens directly (UTF-8 with BOM, comma separated, quoted where needed).</summary>
+    /// <summary>CSV text Excel opens directly (UTF-8 with BOM, comma separated, quoted where needed, names Excel would misread guarded).</summary>
     public static class Csv
     {
         public static string Line(IEnumerable<string> cells)
@@ -93,8 +93,9 @@ namespace AB.WorksetManager.Core
         public static string Escape(string cell)
         {
             string value = cell ?? string.Empty;
-            // Values are written exactly as they are (no formula guard), so an exported list reads back
-            // unchanged when it is loaded again as a Rename or Create list.
+            // Excel would turn "+ Link_A" into a formula (#NAME?), "01" into 1 and "3-4" into a date: such values
+            // are written as ="..." - Excel shows the text, and NameList reads it back unchanged.
+            if (ExcelText.NeedsGuard(value)) value = ExcelText.Guard(value);
             bool quote = value.IndexOfAny(new[] { ',', ';', '"', '\r', '\n', '\t' }) >= 0 || value.StartsWith(" ") || value.EndsWith(" ");
             return quote ? "\"" + value.Replace("\"", "\"\"") + "\"" : value;
         }

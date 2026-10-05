@@ -307,7 +307,7 @@ namespace AB.WorksetManager.Addin.UI
             var dialog = new Microsoft.Win32.OpenFileDialog
             {
                 Title = title,
-                Filter = "Workset lists (*.txt;*.csv)|*.txt;*.csv|All files (*.*)|*.*",
+                Filter = ListFile.OpenFilter + "|All files (*.*)|*.*",
                 InitialDirectory = LastFolder()
             };
             if (dialog.ShowDialog(this) != true) return null;
@@ -320,7 +320,9 @@ namespace AB.WorksetManager.Addin.UI
             var dialog = new Microsoft.Win32.SaveFileDialog
             {
                 Title = title,
-                Filter = "CSV for Excel (*.csv)|*.csv",
+                Filter = ListFile.SaveFilter,
+                DefaultExt = ".xlsx",
+                AddExtension = true,
                 FileName = fileName,
                 InitialDirectory = LastFolder()
             };
@@ -335,27 +337,23 @@ namespace AB.WorksetManager.Addin.UI
             return Directory.Exists(folder) ? folder : Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
         }
 
-        private static string ReadText(string path)
-        {
-            // Excel writes CSV in the PC's ANSI code page unless "CSV UTF-8" is chosen; a BOM tells which.
-            byte[] bytes = File.ReadAllBytes(path);
-            try { return new UTF8Encoding(false, true).GetString(bytes); }
-            catch (DecoderFallbackException) { return Encoding.Default.GetString(bytes); }
-        }
-
         private string SafeFileName(string text)
         {
             foreach (char c in Path.GetInvalidFileNameChars()) text = text.Replace(c, '_');
             return text;
         }
 
-        private void ExportCsv(string title, string fileName, IEnumerable<IEnumerable<string>> rows)
+        /// <summary>
+        /// Saves a table for Excel. The first row is the header. .xlsx by default (every cell text, so Excel
+        /// never turns a name like "+ Link_A" into a formula); CSV when the user picks it.
+        /// </summary>
+        private void Export(string title, string fileStem, IList<IList<string>> rows)
         {
-            string path = AskSave(title, SafeFileName(fileName));
+            string path = AskSave(title, SafeFileName(fileStem) + ".xlsx");
             if (path == null) return;
             Safe("Export", () =>
             {
-                Csv.Write(path, rows);
+                using (Busy()) ListFile.Write(path, title.Replace("Export ", ""), rows[0], rows.Skip(1).ToList());
                 var report = new Report(title);
                 report.Done("Saved " + path);
                 _session.Publish(report);

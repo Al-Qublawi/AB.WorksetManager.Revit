@@ -10,9 +10,9 @@ file-based or cloud. Part of the **AB Adv Tools** suite: it sits on the shared *
 
 | Tab | |
 |---|---|
-| **Overview** | Every user workset: element count, open/closed, editable, owner, *Visible in all views*, the active one. Export to CSV, make a workset active. |
-| **Create** | Paste names (one per line, or from Excel) or load a `.txt` / `.csv`. *Check* says, per line, whether the workset is already in the model, a duplicate, or has characters Revit refuses - and lists worksets in the model that your list does not have. Create all or only the ticked ones, each with its *Visible in all views* setting. |
-| **Rename** | Type new names in the grid, or load a two-column list (current name, new name). *Export list* gives a ready file to edit in Excel. Swaps (A->B, B->A) and capitals-only renames work. All renames happen together or none do. |
+| **Overview** | Every user workset: element count, open/closed, editable, owner, *Visible in all views*, the active one. Export to Excel, make a workset active. |
+| **Create** | Paste names (one per line, or from Excel) or load an Excel `.xlsx`, `.csv` or `.txt`. *Check* says, per line, whether the workset is already in the model, a duplicate, or has characters Revit refuses - and lists worksets in the model that your list does not have. Create all or only the ticked ones, each with its *Visible in all views* setting. |
+| **Rename** | Type new names in the grid, or load a two-column list (current name, new name). *Export list* gives a ready Excel file (all cells text, so names like `+ Link_A` survive Excel). Swaps (A->B, B->A) and capitals-only renames work. All renames happen together or none do. |
 | **Grids / Levels** | Tick grids and levels (optionally scope boxes and reference planes) - all, the Revit selection, or picked in the model - and move them to *Shared Levels and Grids* or any workset. |
 | **Revit / CAD** | Revit links, linked CAD and imported CAD. Move the ticked ones to a workset, or create a workset per link from a naming pattern (`Z-Link-RVT-{FileName}`, `Z-Link-CAD-{FileName}`, editable per row). A Revit link's **type moves with its instance** - the type's workset is what decides whether the link loads when that workset is closed. |
 | **3D Views** | One combined 3D view of the ticked worksets, or one 3D view per workset (`3D - WS - {Workset}`). Each shows its worksets and hides every other. A 3D view with that name already in the model is updated, never duplicated. |

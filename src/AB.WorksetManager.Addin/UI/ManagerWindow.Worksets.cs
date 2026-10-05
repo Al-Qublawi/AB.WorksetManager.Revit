@@ -34,13 +34,13 @@ namespace AB.WorksetManager.Addin.UI
 
         private void OvExport_Click(object sender, RoutedEventArgs e)
         {
-            var rows = new List<IEnumerable<string>> { new[] { "Name", "New Name", "Elements", "Open", "Editable", "Owner", "Visible in all views", "Active" } };
-            rows.AddRange(_session.Worksets.Select(w => new[]
+            var rows = new List<IList<string>> { new[] { "Name", "New Name", "Elements", "Open", "Editable", "Owner", "Visible in all views", "Active" } };
+            rows.AddRange(_session.Worksets.Select(w => (IList<string>)new[]
             {
                 w.Name, "", w.ElementCount.ToString(), w.IsOpen ? "Yes" : "No", w.IsEditable ? "Yes" : "No", w.Owner,
                 w.VisibleByDefault ? "Yes" : "No", w.IsActive ? "Yes" : ""
             }));
-            ExportCsv("Export worksets", _session.Doc.Title + " - worksets.csv", rows);
+            Export("Export worksets", _session.Doc.Title + " - worksets", rows);
         }
 
         private void OvMakeActive_Click(object sender, RoutedEventArgs e)
@@ -59,11 +59,12 @@ namespace AB.WorksetManager.Addin.UI
 
         private void CrLoad_Click(object sender, RoutedEventArgs e)
         {
-            string path = AskOpen("Load a list of worksets");
+            string path = AskOpen("Load a list of worksets (.xlsx, .csv or .txt)");
             if (path == null) return;
             Safe("Load list", () =>
             {
-                List<NameRow> rows = NameList.Parse(ReadText(path), NameList.FormatForFile(path));
+                List<NameRow> rows = ListFile.Read(path);
+                WarnIfExcelDamaged(rows);
                 // Show the list as plain lines (tab before the visibility), so it can be edited before checking.
                 CrText.Text = string.Join(Environment.NewLine, rows.Select(r => r.Name + (r.Visible.HasValue ? "\t" + (r.Visible.Value ? "Yes" : "No") : "")));
                 CrCheck();
@@ -105,6 +106,21 @@ namespace AB.WorksetManager.Addin.UI
             CrCheck();
         }
 
+        /// <summary>
+        /// A CSV opened and saved in Excel can come back with #NAME? instead of names that started with
+        /// + = - @ - the original names are gone from that file. Say so instead of "not in the model".
+        /// </summary>
+        private void WarnIfExcelDamaged(List<NameRow> rows)
+        {
+            string[] errors = { "#NAME?", "#VALUE!", "#REF!", "#N/A", "#DIV/0!", "#NUM!", "#NULL!" };
+            var damaged = rows.Where(r => errors.Contains(r.Name.Trim()) || errors.Contains(r.NewName.Trim())).Select(r => r.Line).ToList();
+            if (damaged.Count == 0) return;
+            Tell(damaged.Count + " line(s) of this file hold an Excel error such as #NAME? instead of a name (lines " +
+                 string.Join(", ", damaged.Take(12)) + (damaged.Count > 12 ? ", ..." : "") + ")." + Environment.NewLine + Environment.NewLine +
+                 "This happens when a CSV is opened in Excel and names start with + = - or @: Excel reads them as formulas, " +
+                 "and saving the file loses the names. Export the list again as an Excel file (.xlsx) - it keeps every name as text.");
+        }
+
         // ================================================================== Rename
 
         private List<RenameRow> _rnRows;
@@ -123,11 +139,12 @@ namespace AB.WorksetManager.Addin.UI
 
         private void RnLoad_Click(object sender, RoutedEventArgs e)
         {
-            string path = AskOpen("Load a rename list (current name, new name)");
+            string path = AskOpen("Load a rename list: current name, new name (.xlsx, .csv or .txt)");
             if (path == null) return;
             Safe("Load rename list", () =>
             {
-                List<NameRow> rows = NameList.Parse(ReadText(path), NameList.FormatForFile(path));
+                List<NameRow> rows = ListFile.Read(path);
+                WarnIfExcelDamaged(rows);
                 var byName = _rnRows.ToDictionary(r => r.Name, WorksetNames.Comparer);
                 int matched = 0;
                 var missing = new List<string>();
@@ -143,9 +160,9 @@ namespace AB.WorksetManager.Addin.UI
 
         private void RnExport_Click(object sender, RoutedEventArgs e)
         {
-            var rows = new List<IEnumerable<string>> { new[] { "Current Name", "New Name" } };
-            rows.AddRange(_rnRows.Select(r => new[] { r.Name, r.NewName }));
-            ExportCsv("Export rename list", _session.Doc.Title + " - rename worksets.csv", rows);
+            var rows = new List<IList<string>> { new[] { "Current Name", "New Name" } };
+            rows.AddRange(_rnRows.Select(r => (IList<string>)new[] { r.Name, r.NewName }));
+            Export("Export rename list", _session.Doc.Title + " - rename worksets", rows);
         }
 
         private void RnClear_Click(object sender, RoutedEventArgs e) { foreach (RenameRow r in _rnRows) r.NewName = string.Empty; RnSummary.Text = string.Empty; }

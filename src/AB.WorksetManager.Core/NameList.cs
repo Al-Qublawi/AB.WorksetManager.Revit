@@ -60,26 +60,38 @@ namespace AB.WorksetManager.Core
 
         public static List<NameRow> Parse(string text, ListFormat format)
         {
-            var rows = new List<NameRow>();
-            if (string.IsNullOrEmpty(text)) return rows;
-            if (text.Length > 0 && text[0] == '﻿') text = text.Substring(1);
+            var cellRows = new List<KeyValuePair<int, List<string>>>();
+            if (string.IsNullOrEmpty(text)) return new List<NameRow>();
+            if (text[0] == '\uFEFF') text = text.Substring(1);
 
             string[] lines = text.Replace("\r\n", "\n").Replace('\r', '\n').Split('\n');
             char delimiter = format == ListFormat.Csv ? CsvDelimiter(lines) : '\t';
-
-            int nameCol = 0, newCol = 1, visibleCol = 2;
-            bool headerSeen = false;
-            bool columnTwoIsVisibility = false;
-            var parsed = new List<KeyValuePair<int, List<string>>>();
-
             for (int i = 0; i < lines.Length; i++)
             {
-                string line = lines[i];
-                if (string.IsNullOrWhiteSpace(line)) continue;
-                string trimmed = line.TrimStart();
-                if (trimmed.StartsWith("#", StringComparison.Ordinal) || trimmed.StartsWith("//", StringComparison.Ordinal)) continue;
+                if (string.IsNullOrWhiteSpace(lines[i])) continue;
+                List<string> cells = format == ListFormat.Csv ? SplitCsv(lines[i], delimiter) : lines[i].Split('\t').ToList();
+                cellRows.Add(new KeyValuePair<int, List<string>>(i + 1, cells));
+            }
+            return FromCells(cellRows);
+        }
 
-                List<string> cells = format == ListFormat.Csv ? SplitCsv(line, delimiter) : line.Split('\t').ToList();
+        /// <summary>
+        /// Rows of cells (from a spreadsheet, CSV or pasted text) with their 1-based line numbers. Blank rows and
+        /// rows whose first cell starts with # or // are ignored; ="text" cells (how a CSV keeps Excel from
+        /// reading "+ Link" as a formula) are read as the text.
+        /// </summary>
+        public static List<NameRow> FromCells(IEnumerable<KeyValuePair<int, List<string>>> source)
+        {
+            int nameCol = 0, newCol = 1, visibleCol = 2;
+            bool headerSeen = false;
+            var parsed = new List<KeyValuePair<int, List<string>>>();
+
+            foreach (var pair in source)
+            {
+                List<string> cells = pair.Value.Select(c => ExcelText.Unguard(c ?? string.Empty)).ToList();
+                if (cells.All(string.IsNullOrWhiteSpace)) continue;
+                string first = (cells.Count > 0 ? cells[0] : string.Empty).TrimStart();
+                if (first.StartsWith("#", StringComparison.Ordinal) || first.StartsWith("//", StringComparison.Ordinal)) continue;
 
                 if (!headerSeen && parsed.Count == 0 && LooksLikeHeader(cells))
                 {
@@ -89,10 +101,11 @@ namespace AB.WorksetManager.Core
                     visibleCol = IndexOf(cells, VisibleTitles, -1);
                     continue;
                 }
-                parsed.Add(new KeyValuePair<int, List<string>>(i + 1, cells));
+                parsed.Add(new KeyValuePair<int, List<string>>(pair.Key, cells));
             }
 
             // Without titles, a second column holding only Yes/No values is the visibility of a Create list.
+            bool columnTwoIsVisibility = false;
             if (!headerSeen)
             {
                 var second = parsed.Where(p => p.Value.Count > 1 && !string.IsNullOrWhiteSpace(p.Value[1])).Select(p => p.Value[1]).ToList();
@@ -104,14 +117,11 @@ namespace AB.WorksetManager.Core
                 }
             }
 
+            var rows = new List<NameRow>();
             foreach (var p in parsed)
             {
-                List<string> cells = p.Value;
-                string name = Cell(cells, nameCol);
-                string newName = Cell(cells, newCol);
-                bool? visible = ParseYesNo(Cell(cells, visibleCol));
-                if (columnTwoIsVisibility) newName = string.Empty;
-                rows.Add(new NameRow(p.Key, name, newName, visible));
+                string newName = columnTwoIsVisibility ? string.Empty : Cell(p.Value, newCol);
+                rows.Add(new NameRow(p.Key, Cell(p.Value, nameCol), newName, ParseYesNo(Cell(p.Value, visibleCol))));
             }
             return rows;
         }
@@ -122,7 +132,7 @@ namespace AB.WorksetManager.Core
             if (string.IsNullOrWhiteSpace(value)) return null;
             switch (value.Trim().ToLowerInvariant())
             {
-                case "yes": case "y": case "true": case "1": case "on": case "visible": case "x": return true;
+                case "yes": case "y": case "true": case "1": case "on": case "visible": case "x": case "\u2713": return true;
                 case "no": case "n": case "false": case "0": case "off": case "hidden": return false;
                 default: return null;
             }

@@ -78,7 +78,7 @@ namespace AB.WorksetManager.Core.Tests
         [Test]
         public static void ExportedCsvReadsBack()
         {
-            var names = new[] { "Plain", "With, comma", "With \"quotes\"", "-Leading dash", "=Equals" };
+            var names = new[] { "Plain", "With, comma", "With \"quotes\"", "-Leading dash", "=Equals", "+ Link_DG-DSQ-311-513-AEC-DDE-FP-AB1-10", "01", "3-4", "@at" };
             string text = "Name,New Name\r\n" + string.Join("\r\n", names.Select(n => Csv.Line(new[] { n, n + " X" })));
             var rows = NameList.Parse(text, ListFormat.Csv);
             for (int i = 0; i < names.Length; i++)
@@ -86,6 +86,52 @@ namespace AB.WorksetManager.Core.Tests
                 Assert.Equal(names[i], rows[i].Name, "name " + i);
                 Assert.Equal(names[i] + " X", rows[i].NewName, "new name " + i);
             }
+        }
+    }
+
+    internal static class ExcelTests
+    {
+        private static readonly string[] Tricky = { "+ Link_DG-DSQ-311-513-AEC-DDE-FP-AB1-10", "+ Link_Hotel 1 model", "=Equals", "-Dash", "@At", "01", "3-4", "1.5", "Plain, comma", "Quote \"q\"", " spaced " };
+
+        [Test]
+        public static void CsvGuardsWhatExcelWouldMisread()
+        {
+            Assert.Equal("\"=\"\"+ Link_A\"\"\"", Csv.Escape("+ Link_A"), "formula-like name written as =\"...\"");
+            Assert.Equal("Plain", Csv.Escape("Plain"), "plain name untouched");
+            Assert.Equal("=\"a\"&B1", ExcelText.Unguard("=\"a\"&B1"), "a real formula is not unwrapped");
+            Assert.Equal("+ x", ExcelText.Unguard("=\"+ x\""), "guard removed on reading");
+        }
+
+        [Test]
+        public static void XlsxRoundTrip()
+        {
+            string path = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "abwm-test-" + System.Guid.NewGuid().ToString("N") + ".xlsx");
+            try
+            {
+                ListFile.Write(path, "Rename", new[] { "Current Name", "New Name" }, Tricky.Select(n => (IList<string>)new[] { n, n + " X" }).ToList());
+                var rows = ListFile.Read(path);
+                Assert.Equal(Tricky.Length, rows.Count, "rows");
+                for (int i = 0; i < Tricky.Length; i++)
+                {
+                    Assert.Equal(Tricky[i].Trim(), rows[i].Name, "name " + i);
+                    Assert.Equal((Tricky[i] + " X").Trim(), rows[i].NewName, "new name " + i);
+                }
+            }
+            finally { if (System.IO.File.Exists(path)) System.IO.File.Delete(path); }
+        }
+
+        [Test]
+        public static void CsvFileRoundTrip()
+        {
+            string path = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "abwm-test-" + System.Guid.NewGuid().ToString("N") + ".csv");
+            try
+            {
+                ListFile.Write(path, "Rename", new[] { "Current Name", "New Name" }, Tricky.Select(n => (IList<string>)new[] { n, "" }).ToList());
+                var rows = ListFile.Read(path);
+                Assert.Equal(Tricky.Length, rows.Count, "rows");
+                for (int i = 0; i < Tricky.Length; i++) Assert.Equal(Tricky[i].Trim(), rows[i].Name, "name " + i);
+            }
+            finally { if (System.IO.File.Exists(path)) System.IO.File.Delete(path); }
         }
     }
 

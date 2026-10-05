@@ -61,7 +61,7 @@ namespace AB.WorksetManager.Addin.UI
 
             var dock = new DockPanel { Margin = new Thickness(10) };
             var bar = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 0, 0, 8) };
-            var export = new Button { Content = "Export to CSV...", Padding = new Thickness(10, 3, 10, 3), Margin = new Thickness(0, 0, 8, 0) };
+            var export = new Button { Content = "Export to Excel...", Padding = new Thickness(10, 3, 10, 3), Margin = new Thickness(0, 0, 8, 0) };
             export.Click += (s, e) => owner.ExportStatus(table);
             var close = new Button { Content = "Close", Padding = new Thickness(10, 3, 10, 3), IsCancel = true };
             close.Click += (s, e) => Close();
