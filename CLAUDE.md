@@ -44,7 +44,7 @@ Part of the AB Adv Tools suite; the kit is vendored in `shared/ABAdvTools` (cano
 - Banner line under the title: `AdvToolsBrand.Copyright` + LinkedIn link (`AdvToolsBrand.LinkedInUrl`).
 - `DevHarness.MultiTickTest` (briefly shown real window, Delete tab) **passed in Revit 2026.5**: pressing a tick
   box keeps a 3-row selection, its click ticks all 3, Space unticks / ticks them; banner text correct.
-  Shift+click reads the real keyboard and is not simulated.
+  Shift+click reads the real keyboard and is not simulated - **the owner tried it by hand in 1.0.1: works.**
 
 ## Layout
 
@@ -107,7 +107,8 @@ ACTIVE document** - never do model work there). Snippets in `tools/revit-bridge/
 
 ## Not verified yet
 
-- Interactive use by the owner (buttons, dialogs, picking) inside Revit; the ribbon button itself.
+- The owner installed and used 1.0.0 and 1.0.1 (ribbon button, window, tabs, Shift+click ticking) -
+  his requests after the first test became 1.0.1. "Pick in model" has not been reported on yet.
 - Revit 2022, 2023, 2024, 2025, 2027 live (they build; 2026 tested).
 - Elements borrowed by **another user** (only one user on this PC) - the code path is
   `GetCheckoutStatus == OwnedByOtherUser` -> skipped with the owner's name.
