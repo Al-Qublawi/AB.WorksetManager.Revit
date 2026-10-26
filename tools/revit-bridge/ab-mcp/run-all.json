@@ -1,0 +1,16 @@
+{
+  "tool": "revit_run_assembly_method",
+  "note": "Runs on the background local copy made by make-test-central.cs. Add \"confirm\": true once the human approved this run. Replace <N> with the dev build number.",
+  "arguments": {
+    "assemblyPath": "%LOCALAPPDATA%\\Temp\\ABWorksetDev\\v<N>\\AB.WorksetManager.Addin.dll",
+    "typeName": "AB.WorksetManager.Addin.Diagnostics.DevHarness",
+    "methodName": "RunAll",
+    "arguments": [
+      {
+        "document": "ABWM_Arch_local"
+      }
+    ],
+    "waitSeconds": 30,
+    "description": "AB Worksets Manager dev build <N>: DevHarness.RunAll"
+  }
+}

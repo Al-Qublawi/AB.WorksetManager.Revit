@@ -99,6 +99,11 @@ Checked through real Excel by COM on this PC: the .xlsx and the CSV both show `+
 
 ## Live test (how)
 
+**With AB Revit MCP 1.6.0+ (preferred):** `tools/revit-bridge/README.md`, files in `tools/revit-bridge/ab-mcp` -
+`revit_execute_code` with `"transaction": "none"` for the test set, `revit_run_assembly_method` for the
+harness, `revit_get_job_result` for long runs. Needs the human to open the server flag and Code exec.
+Compiles for 2025-2027; not yet run live this way. The older way:
+
 Revit open with the MCP bridge switched on (`send_code_to_revit` runs C# **inside a transaction on the
 ACTIVE document** - never do model work there). Snippets in `tools/revit-bridge/`:
 
